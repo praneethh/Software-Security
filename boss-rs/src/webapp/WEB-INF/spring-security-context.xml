@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:security="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+                http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd
+                http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.xsd">
+
+	
+	<!-- Enabling Spring beans auto-discovery -->
+	<context:component-scan base-package="boss" />
+
+  	<context:property-placeholder order="1" location="/WEB-INF/config.properties" ignore-unresolvable="true" /> 
+
+	<!-- Enabling Spring MVC configuration through annotations -->
+	<mvc:annotation-driven />
+	<mvc:default-servlet-handler/>
+
+	<!-- Defining which view resolver to use -->
+	<bean id="viewResolver"
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/views/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+	
+	
+	 <!-- enable use-expressions -->
+	<security:http auto-config="true" use-expressions="true" disable-url-rewriting = "true">
+	 <security:session-management session-authentication-error-url="/login" invalid-session-url="/login">
+        <security:concurrency-control max-sessions="1" error-if-maximum-exceeded="true" expired-url="/login" />
+    </security:session-management>
+		<security:intercept-url pattern="/admin**" access="hasRole('ROLE_ADMIN')" requires-channel="https" />
+		<security:intercept-url pattern="/extuser**" access="hasRole('ROLE_USER')" requires-channel="https" />
+		<security:intercept-url pattern="/InternalUser**" access="hasRole('ROLE_EMPLOYEE')" requires-channel="https"/>
+		<security:intercept-url pattern="/merchant**" access="hasRole('ROLE_MERCHANT')" requires-channel="https"/>
+		<!-- access denied page -->
+		<security:access-denied-handler error-page="/403"/>
+	  	<security:form-login 
+		    login-page="/login"  
+		    default-target-url="/welcome"
+		    authentication-success-handler-ref="myAuthenticationSuccessHandler"
+		    authentication-failure-handler-ref="myAuthenticationFailureHandler" 
+			username-parameter="user_name"
+			password-parameter="password" />
+		<security:logout logout-success-url="/login?logout"  />
+		  <security:session-management >
+		        <security:concurrency-control max-sessions="1" error-if-maximum-exceeded="true" />
+            	</security:session-management> 
+	</security:http>
+	
+	<!-- Select users and user_roles from database -->
+	<!--  <security:authentication-manager>
+		<security:authentication-provider>
+			  <security:jdbc-user-service data-source-ref="pooledDataSource"
+				users-by-username-query=
+					"select user_name, password, enabled from BOSS_USER where user_name=?"
+				authorities-by-username-query=
+					"select user_name, role from BOSS_ROLES where user_name =?  " /> 
+		</security:authentication-provider>
+	</security:authentication-manager>-->
+	
+	
+	<security:authentication-manager>
+	 <security:authentication-provider user-service-ref="bossUserDetailsService" >
+	 <security:password-encoder ref="encoder" >
+	 </security:password-encoder>
+	 </security:authentication-provider>
+	</security:authentication-manager>
+	<bean id ="bossUserDetailsService" class="boss.boss_rs.BossUserDetailsService">
+	</bean>
+	<bean id ="myAuthenticationSuccessHandler" class="boss.boss_controller.BossAuthenticationSuccessHandler">
+	</bean>
+	<bean id ="myAuthenticationFailureHandler" class="boss.boss_controller.BossAuthenticationFailureHandler">
+	</bean>
+	 <bean id="encoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"></bean>
+	 </beans>

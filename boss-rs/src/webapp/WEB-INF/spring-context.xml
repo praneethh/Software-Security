@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jaxrs="http://cxf.apache.org/jaxrs"
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+		http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd">
+
+	<context:annotation-config />
+	<!-- CXF is being used in this case for a REST container. -->
+	<import resource="classpath:META-INF/cxf/cxf.xml" />
+
+	<context:property-placeholder order="1"	location="/WEB-INF/config.properties" ignore-unresolvable="true" />
+	
+	<import resource="DS_MASTER-context.xml" /> 
+	<!--  <import resource="DS_MASTER-context.xml" /> -->
+	<!--  <import resource="ds/cache/DS_CACHE-context.xml" /> -->
+	<!--  import resource="ds/index/DS_INDEX-context.xml" -->
+
+	 <import resource="spring-security-context.xml" /> 
+
+	
+	<context:component-scan base-package="boss" >
+			<!--  <context:exclude-filter type="regex" 
+			expression="com.crexendo.builder.service.authentication.*" />  -->
+	</context:component-scan>
+
+ 	
+	<bean
+			class="org.springframework.web.context.support.ServletContextPropertyPlaceholderConfigurer" />
+	<bean
+		class="org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer" />
+
+
+		<bean id="messageSource"
+		class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+		<property name="basename" value="classpath:messages_en" />
+		<property name="defaultEncoding" value="UTF-8" />
+	</bean>
+<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver" />
+
+	<jaxrs:server address="/login">
+		<jaxrs:serviceBeans>
+			<bean class="boss.boss_rs.UserService" />
+		</jaxrs:serviceBeans>
+	</jaxrs:server>
+<!--  
+	<bean id="authorizationFilter"
+		class="com.crexendo.builder.service.authentication.JaxRSServiceAuthFilter">
+		<property name="accountIdParameterKey" value="accountId" />
+		<property name="apiVersionParameterKey" value="apiVersion" />
+		<property name="jaxrsTemplateParametersKey" value="jaxrs.template.parameters" />
+		<property name="httpRequestParameterKey" value="HTTP.REQUEST" />
+		
+		<property name="requiredKeychainRole" value="1" />
+		<property name="defaultForbidden" value="true" />
+		<property name="enabled" value="true" />
+	</bean>
+
+	<bean id="formAccountServiceFilter"
+		class="com.crexendo.form.service.authorization.FormAccountServiceFilter">
+		<property name="accountIdParameterKey" value="accountId" />
+		<property name="apiVersionParameterKey" value="apiVersion" />
+		<property name="jaxrsTemplateParametersKey" value="jaxrs.template.parameters" />
+		<property name="httpRequestParameterKey" value="HTTP.REQUEST" />
+		
+		<property name="defaultForbidden" value="false" />
+		<property name="enabled" value="true" />
+	</bean>
+
+
+	<jaxrs:server address="/formaction">
+		<jaxrs:serviceBeans>
+			<bean class="com.crexendo.form.service.FormPostHandlerService" />
+		</jaxrs:serviceBeans>
+	</jaxrs:server>
+	
+	<jaxrs:server address="/register">
+		<jaxrs:serviceBeans>
+			<bean class="com.crexendo.registration.service.RegistrationService" />
+		</jaxrs:serviceBeans>
+	</jaxrs:server>
+	
+	<jaxrs:server address="/">
+		<jaxrs:providers>
+ 			<ref bean="authorizationFilter" />
+			<ref bean="formAccountServiceFilter" />
+		</jaxrs:providers>
+		<jaxrs:serviceBeans>
+			<bean class="com.crexendo.account.service.AccountService" />
+			<bean class="com.crexendo.resource.service.ResourceService" />
+			<bean class="com.crexendo.form.service.FormAccountService" />
+			<bean class="com.crexendo.form.service.FormAccountAdminService" />
+			<bean class="com.crexendo.job.service.JobService" />
+			<bean class="com.crexendo.builder.lockelement.service.LockElementService" />
+			<bean class="com.crexendo.builder.template.service.TemplateService" />
+			<bean class="com.crexendo.builder.communication.service.AccountPickerService" />
+			<bean class="com.crexendo.domain.service.DomainService" />	
+			<bean class="com.crexendo.account.service.AccountActivitiesService" />	
+			<bean class="com.crexendo.versioning.service.RevisionService" />
+		</jaxrs:serviceBeans>
+	</jaxrs:server>
+
+
+	<bean id="entityObjectMapper" class="com.crexendo.json.mappers.EntityObjectMapper" />
+
+	<bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="maxUploadSize" value="300000" />
+	</bean>
+ 
+<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+	  <property name="host" value="localhost"/>
+</bean>
+-->
+<!-- 
+ 	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<property name="username" value="@gmail.com" />
+		<property name="password" value="" />
+		
+		<property name="javaMailProperties">
+			<props>
+				<prop key="mail.smtp.host">smtp.gmail.com</prop>
+				<prop key="mail.smtp.socketFactory.port">465</prop>
+				<prop key="mail.smtp.socketFactory.class">javax.net.ssl.SSLSocketFactory</prop>
+				<prop key="mail.smtp.auth">true</prop>
+				<prop key="mail.smtp.port">465</prop>
+			</props>
+		</property>
+	</bean>
+-->
+
+
+</beans> 
